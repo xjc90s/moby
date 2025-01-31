@@ -207,6 +207,18 @@ func (sb *Sandbox) SetKey(ctx context.Context, basePath string) error {
 	return nil
 }
 
+// NetnsPath returns the network namespace's path and true, if a network has been
+// created - else the empty string and false.
+func (sb *Sandbox) NetnsPath() (path string, ok bool) {
+	sb.mu.Lock()
+	osSbox := sb.osSbox
+	sb.mu.Unlock()
+	if osSbox == nil {
+		return "", false
+	}
+	return osSbox.Key(), true
+}
+
 // IPv6Enabled determines whether a container supports IPv6.
 // IPv6 support can always be determined for host networking. For other network
 // types it can only be determined once there's a container namespace to probe,
@@ -283,15 +295,18 @@ func (sb *Sandbox) restoreOslSandbox() error {
 		}
 	}
 
-	gwep4, gwep6 := sb.getGatewayEndpoint()
-	if gwep4 != nil {
-		if err := sb.osSbox.Restore(interfaces, routes, gwep4.joinInfo.gw, gwep4.joinInfo.gw6); err != nil {
-			return err
-		}
+	if err := sb.osSbox.RestoreInterfaces(interfaces); err != nil {
+		return err
 	}
-	if gwep6 != nil {
-		if err := sb.osSbox.Restore(interfaces, routes, gwep6.joinInfo.gw, gwep6.joinInfo.gw6); err != nil {
-			return err
+	if len(routes) > 0 {
+		sb.osSbox.RestoreRoutes(routes)
+	}
+	if gwEp4, gwEp6 := sb.getGatewayEndpoint(); gwEp4 != nil || gwEp6 != nil {
+		if gwEp4 != nil {
+			sb.osSbox.RestoreGateway(true, gwEp4.joinInfo.gw, gwEp4.iface.srcName)
+		}
+		if gwEp6 != nil {
+			sb.osSbox.RestoreGateway(false, gwEp6.joinInfo.gw6, gwEp6.iface.srcName)
 		}
 	}
 
@@ -337,6 +352,15 @@ func (sb *Sandbox) populateNetworkResources(ctx context.Context, ep *Endpoint) e
 		if sysctls := ep.getSysctls(); len(sysctls) > 0 {
 			ifaceOptions = append(ifaceOptions, osl.WithSysctls(sysctls))
 		}
+		if n := ep.getNetwork(); n != nil {
+			if nMsgs, ok := n.advertiseAddrNMsgs(); ok {
+				ifaceOptions = append(ifaceOptions, osl.WithAdvertiseAddrNMsgs(nMsgs))
+			}
+			if interval, ok := n.advertiseAddrInterval(); ok {
+				ifaceOptions = append(ifaceOptions, osl.WithAdvertiseAddrInterval(interval))
+			}
+		}
+		ifaceOptions = append(ifaceOptions, osl.WithCreatedInContainer(i.createdInContainer))
 
 		if err := sb.osSbox.AddInterface(ctx, i.srcName, i.dstPrefix, ifaceOptions...); err != nil {
 			return fmt.Errorf("failed to add interface %s to sandbox: %v", i.srcName, err)

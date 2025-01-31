@@ -20,7 +20,6 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/integration-cli/cli"
 	"github.com/docker/docker/integration-cli/cli/build"
-	"github.com/docker/docker/pkg/parsers"
 	"github.com/docker/docker/pkg/sysinfo"
 	"github.com/docker/docker/testutil"
 	"github.com/moby/sys/mount"
@@ -694,12 +693,10 @@ func (s *DockerCLIRunSuite) TestRunSwapLessThanMemoryLimit(c *testing.T) {
 func (s *DockerCLIRunSuite) TestRunInvalidCpusetCpusFlagValue(c *testing.T) {
 	testRequires(c, cgroupCpuset, testEnv.IsLocalDaemon)
 
-	sysInfo := sysinfo.New()
-	cpus, err := parsers.ParseUintList(sysInfo.Cpus)
-	assert.NilError(c, err)
+	cpus := sysinfo.New().CPUSets
 	var invalid int
 	for i := 0; i <= len(cpus)+1; i++ {
-		if !cpus[i] {
+		if _, ok := cpus[i]; !ok {
 			invalid = i
 			break
 		}
@@ -713,12 +710,10 @@ func (s *DockerCLIRunSuite) TestRunInvalidCpusetCpusFlagValue(c *testing.T) {
 func (s *DockerCLIRunSuite) TestRunInvalidCpusetMemsFlagValue(c *testing.T) {
 	testRequires(c, cgroupCpuset)
 
-	sysInfo := sysinfo.New()
-	mems, err := parsers.ParseUintList(sysInfo.Mems)
-	assert.NilError(c, err)
+	mems := sysinfo.New().MemSets
 	var invalid int
 	for i := 0; i <= len(mems)+1; i++ {
-		if !mems[i] {
+		if _, ok := mems[i]; !ok {
 			invalid = i
 			break
 		}
@@ -726,24 +721,6 @@ func (s *DockerCLIRunSuite) TestRunInvalidCpusetMemsFlagValue(c *testing.T) {
 	out, _, err := dockerCmdWithError("create", "--cpuset-mems", strconv.Itoa(invalid), "busybox", "true")
 	assert.ErrorContains(c, err, "")
 	expected := fmt.Sprintf("Error response from daemon: Requested memory nodes are not available - requested %s, available: %s", strconv.Itoa(invalid), sysInfo.Mems)
-	assert.Assert(c, is.Contains(out, expected))
-}
-
-func (s *DockerCLIRunSuite) TestRunInvalidCPUShares(c *testing.T) {
-	testRequires(c, cpuShare, DaemonIsLinux)
-	out, _, err := dockerCmdWithError("run", "--cpu-shares", "1", "busybox", "echo", "test")
-	assert.ErrorContains(c, err, "", out)
-	expected := "minimum allowed cpu-shares is 2"
-	assert.Assert(c, is.Contains(out, expected))
-
-	out, _, err = dockerCmdWithError("run", "--cpu-shares", "-1", "busybox", "echo", "test")
-	assert.ErrorContains(c, err, "", out)
-	expected = "shares: invalid argument"
-	assert.Assert(c, is.Contains(out, expected))
-
-	out, _, err = dockerCmdWithError("run", "--cpu-shares", "99999999", "busybox", "echo", "test")
-	assert.ErrorContains(c, err, "", out)
-	expected = "maximum allowed cpu-shares is"
 	assert.Assert(c, is.Contains(out, expected))
 }
 

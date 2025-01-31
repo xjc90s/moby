@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	c8dimages "github.com/containerd/containerd/images"
+	c8dimages "github.com/containerd/containerd/v2/core/images"
 	cerrdefs "github.com/containerd/errdefs"
 	"github.com/containerd/log"
 	"github.com/distribution/reference"
@@ -15,6 +15,7 @@ import (
 	"github.com/docker/docker/container"
 	dimages "github.com/docker/docker/daemon/images"
 	"github.com/docker/docker/image"
+	"github.com/docker/docker/internal/metrics"
 	"github.com/docker/docker/pkg/stringid"
 	"github.com/opencontainers/go-digest"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
@@ -57,7 +58,7 @@ func (i *ImageService) ImageDelete(ctx context.Context, imageRef string, force, 
 	start := time.Now()
 	defer func() {
 		if retErr == nil {
-			dimages.ImageActions.WithValues("delete").UpdateSince(start)
+			metrics.ImageActions.WithValues("delete").UpdateSince(start)
 		}
 	}()
 
@@ -234,7 +235,7 @@ func (i *ImageService) deleteAll(ctx context.Context, imgID image.ID, all []c8di
 			return records, err
 		}
 	}
-	i.LogImageEvent(imgID.String(), imgID.String(), events.ActionDelete)
+	i.LogImageEvent(ctx, imgID.String(), imgID.String(), events.ActionDelete)
 	records = append(records, imagetypes.DeleteResponse{Deleted: imgID.String()})
 
 	for _, parent := range parents {
@@ -247,7 +248,7 @@ func (i *ImageService) deleteAll(ctx context.Context, imgID image.ID, all []c8di
 			break
 		}
 		parentID := parent.Target.Digest.String()
-		i.LogImageEvent(parentID, parentID, events.ActionDelete)
+		i.LogImageEvent(ctx, parentID, parentID, events.ActionDelete)
 		records = append(records, imagetypes.DeleteResponse{Deleted: parentID})
 	}
 
