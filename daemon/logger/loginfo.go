@@ -10,6 +10,16 @@ import (
 	"github.com/moby/moby/v2/daemon/internal/stringid"
 )
 
+// Common log-opts to include extra attributes through [Info.ExtraAttributes]
+// and [loggerutils.ParseLogTag].
+const (
+	AttrEnv         = "env"          // Comma-separated list of env-vars to include as log-metadata.
+	AttrEnvRegex    = "env-regex"    // Regular Expression to match environment variables to include as log-metadata.
+	AttrLabels      = "labels"       // Comma-separated list of labels to include as log-metadata.
+	AttrLabelsRegex = "labels-regex" // Regular Expression to match labels to include as log-metadata.
+	AttrLogTag      = "tag"          // Log "tag" log-metadata. Can be either a literal value or a Go template to use for templating the "tag" log-metadata.
+)
+
 // Info provides enough information for a logging driver to do its function.
 type Info struct {
 	Config              map[string]string
@@ -32,7 +42,7 @@ type Info struct {
 func (info *Info) ExtraAttributes(keyMod func(string) string) (map[string]string, error) {
 	extra := make(map[string]string)
 
-	if labels, ok := info.Config["labels"]; ok && labels != "" {
+	if labels, ok := info.Config[AttrLabels]; ok && labels != "" {
 		for l := range strings.SplitSeq(labels, ",") {
 			if v, ok := info.ContainerLabels[l]; ok {
 				if keyMod != nil {
@@ -43,7 +53,7 @@ func (info *Info) ExtraAttributes(keyMod func(string) string) (map[string]string
 		}
 	}
 
-	if labelsRegex, ok := info.Config["labels-regex"]; ok && labelsRegex != "" {
+	if labelsRegex, ok := info.Config[AttrLabelsRegex]; ok && labelsRegex != "" {
 		re, err := regexp.Compile(labelsRegex)
 		if err != nil {
 			return nil, err
@@ -70,7 +80,7 @@ func (info *Info) ExtraAttributes(keyMod func(string) string) (map[string]string
 		return extra, nil
 	}
 
-	if env, ok := info.Config["env"]; ok && env != "" {
+	if env, ok := info.Config[AttrEnv]; ok && env != "" {
 		for l := range strings.SplitSeq(env, ",") {
 			if v, ok := envMapping[l]; ok {
 				if keyMod != nil {
@@ -81,7 +91,7 @@ func (info *Info) ExtraAttributes(keyMod func(string) string) (map[string]string
 		}
 	}
 
-	if envRegex, ok := info.Config["env-regex"]; ok && envRegex != "" {
+	if envRegex, ok := info.Config[AttrEnvRegex]; ok && envRegex != "" {
 		re, err := regexp.Compile(envRegex)
 		if err != nil {
 			return nil, err
