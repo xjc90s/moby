@@ -27,7 +27,8 @@ import (
 )
 
 const (
-	driverName                    = "splunk"
+	driverName = "splunk"
+
 	splunkURLKey                  = "splunk-url"
 	splunkTokenKey                = "splunk-token"
 	splunkSourceKey               = "splunk-source"
@@ -41,11 +42,6 @@ const (
 	splunkGzipCompressionKey      = "splunk-gzip"
 	splunkGzipCompressionLevelKey = "splunk-gzip-level"
 	splunkIndexAcknowledgment     = "splunk-index-acknowledgment"
-	envKey                        = "env"
-	envRegexKey                   = "env-regex"
-	labelsKey                     = "labels"
-	labelsRegexKey                = "labels-regex"
-	tagKey                        = "tag"
 )
 
 const (
@@ -220,7 +216,7 @@ func New(info logger.Info) (logger.Logger, error) {
 
 	// Allow user to remove tag from the messages by setting tag to empty string
 	var tag string
-	if tagTemplate, ok := info.Config[tagKey]; !ok || tagTemplate != "" {
+	if tagTemplate, ok := info.Config[logger.AttrLogTag]; !ok || tagTemplate != "" {
 		tag, err = loggerutils.ParseLogTag(info, loggerutils.DefaultTemplate)
 		if err != nil {
 			return nil, err
@@ -541,6 +537,10 @@ func (l *splunkLogger) createSplunkMessage(msg *logger.Message) *splunkMessage {
 func ValidateLogOpt(cfg map[string]string) error {
 	for key := range cfg {
 		switch key {
+		case logger.AttrEnv, logger.AttrEnvRegex, logger.AttrLabels, logger.AttrLabelsRegex, logger.AttrLogTag:
+			// Common attributes handled through [logger.Info.ExtraAttributes] and [loggerutils.ParseLogTag].
+			continue
+
 		case splunkURLKey:
 		case splunkTokenKey:
 		case splunkSourceKey:
@@ -554,11 +554,6 @@ func ValidateLogOpt(cfg map[string]string) error {
 		case splunkGzipCompressionKey:
 		case splunkGzipCompressionLevelKey:
 		case splunkIndexAcknowledgment:
-		case envKey:
-		case envRegexKey:
-		case labelsKey:
-		case labelsRegexKey:
-		case tagKey:
 		default:
 			return fmt.Errorf("unknown log opt '%s' for %s log driver", key, driverName)
 		}
