@@ -49,6 +49,11 @@ func TestDockerUserAgent(t *testing.T) {
 			ctx:      context.WithValue(t.Context(), UAStringKey{}, `Magic-Client/1.2.3 (linux); \ test`),
 			expected: getDaemonUserAgent() + ` UpstreamClient(Magic-Client/1.2.3 \(linux\)\; \\ test)`,
 		},
+		{
+			doc:      "daemon user-agent with upstream control chars",
+			ctx:      context.WithValue(t.Context(), UAStringKey{}, "Magic-Client/1.2.3\r\nInjected: evil"),
+			expected: getDaemonUserAgent() + ` UpstreamClient(Magic-Client/1.2.3Injected: evil)`,
+		},
 	}
 
 	for _, tc := range tests {
