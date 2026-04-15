@@ -144,11 +144,11 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
 # containerd
 FROM base AS containerd-src
 WORKDIR /usr/src/containerd
-# CONTAINERD_VERSION is used to build containerd binaries, and used for the
-# integration tests. The distributed docker .deb and .rpm packages depend on a
-# separate (containerd.io) package, which may be a different version as is
-# specified here.
-ARG CONTAINERD_VERSION=v2.2.2
+# CONTAINERD_VERSION is the version of containerd to use for CI and static binaries.
+# It is used to build containerd binaries, and used for the integration tests.
+# The distributed docker .deb and .rpm packages depend on a separate (containerd.io)
+# package, which may be a different version than specified here.
+ARG CONTAINERD_VERSION=v2.2.3
 ADD https://github.com/containerd/containerd.git?ref=${CONTAINERD_VERSION}&keep-git-dir=1 .
 
 FROM base AS containerd-build
