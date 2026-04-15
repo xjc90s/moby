@@ -1,17 +1,11 @@
 name: test
 
-# Default to 'contents: read', which grants actions to read commits.
-#
-# If any permission is set, any permission not included in the list is
-# implicitly set to "none".
-#
-# see https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#permissions
-permissions:
-  contents: read
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+permissions:
+  contents: read
 
 on:
   workflow_dispatch:
@@ -48,8 +42,10 @@ jobs:
     steps:
       -
         name: Prepare
+        env:
+          MODE: ${{ matrix.mode }}
         run: |
-          if [ "${{ matrix.mode }}" = "systemd" ]; then
+          if [ "$MODE" = "systemd" ]; then
             echo "SYSTEMD=true" >> $GITHUB_ENV
           fi
       -
@@ -61,7 +57,7 @@ jobs:
           buildkitd-flags: --debug
       -
         name: Build dev image
-        uses: docker/bake-action@82490499d2e5613fcead7e128237ef0b0ea210f7 # v7
+        uses: docker/bake-action@82490499d2e5613fcead7e128237ef0b0ea210f7 # v7.0.0
         with:
           targets: dev
           set: |
@@ -82,7 +78,6 @@ jobs:
       - build-dev
       - validate-dco
     uses: ./.github/workflows/.test.yml
-    secrets: inherit
     strategy:
       fail-fast: false
       matrix:
@@ -91,6 +86,8 @@ jobs:
           - snapshotter
     with:
       storage: ${{ matrix.storage }}
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   test-unit:
     if: ${{ github.event_name != 'pull_request' || !contains(github.event.pull_request.labels.*.name, 'ci/validate-only') }}
@@ -98,7 +95,8 @@ jobs:
       - build-dev
       - validate-dco
     uses: ./.github/workflows/.test-unit.yml
-    secrets: inherit
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   validate-prepare:
     runs-on: ubuntu-24.04
@@ -117,10 +115,7 @@ jobs:
         run: |
           scripts=$(cd ./hack/validate && jq -nc '$ARGS.positional - ["all", "default", "dco"] | map(select(test("[.]")|not)) + ["generate-files"]' --args *)
           echo "matrix=$scripts" >> $GITHUB_OUTPUT
-      -
-        name: Show matrix
-        run: |
-          echo ${{ steps.scripts.outputs.matrix }}
+          echo "$scripts"
 
   validate:
     runs-on: ubuntu-24.04
@@ -160,8 +155,10 @@ jobs:
           docker load -i /tmp/dev-image.tar
       -
         name: Validate
+        env:
+          SCRIPT: ${{ matrix.script }}
         run: |
-          make -o build validate-${{ matrix.script }}
+          make -o build "validate-${SCRIPT}"
 
   validate-api-swagger:
     runs-on: ubuntu-24.04
@@ -200,10 +197,7 @@ jobs:
         run: |
           matrix="$(docker buildx bake binary-smoketest --print | jq -cr '.target."binary-smoketest".platforms')"
           echo "matrix=$matrix" >> $GITHUB_OUTPUT
-      -
-        name: Show matrix
-        run: |
-          echo ${{ steps.platforms.outputs.matrix }}
+          echo "$matrix"
 
   smoke:
     runs-on: ubuntu-24.04
@@ -218,9 +212,10 @@ jobs:
     steps:
       -
         name: Prepare
+        env:
+          PLATFORM: ${{ matrix.platform }}
         run: |
-          platform=${{ matrix.platform }}
-          echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
+          echo "PLATFORM_PAIR=${PLATFORM//\//-}" >> $GITHUB_ENV
       -
         name: Set up QEMU
         uses: docker/setup-qemu-action@ce360397dd3f832beb865e1373c09c0e9f86d70a # v4.0.0
@@ -233,7 +228,7 @@ jobs:
           buildkitd-flags: --debug
       -
         name: Test
-        uses: docker/bake-action@82490499d2e5613fcead7e128237ef0b0ea210f7 # v7
+        uses: docker/bake-action@82490499d2e5613fcead7e128237ef0b0ea210f7 # v7.0.0
         with:
           targets: binary-smoketest
           set: |
