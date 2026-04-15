@@ -186,18 +186,18 @@ jobs:
     needs:
       - validate-dco
     outputs:
-      matrix: ${{ steps.platforms.outputs.matrix }}
+      includes: ${{ steps.gen.outputs.matrix }}
     steps:
       -
         name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       -
         name: Create matrix
-        id: platforms
-        run: |
-          matrix="$(docker buildx bake binary-smoketest --print | jq -cr '.target."binary-smoketest".platforms')"
-          echo "matrix=$matrix" >> $GITHUB_OUTPUT
-          echo "$matrix"
+        id: gen
+        uses: docker/bake-action/subaction/matrix@82490499d2e5613fcead7e128237ef0b0ea210f7 # v7.0.0
+        with:
+          target: binary-smoketest
+          fields: platforms
 
   smoke:
     runs-on: ubuntu-24.04
@@ -208,12 +208,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: ${{ fromJson(needs.smoke-prepare.outputs.matrix) }}
+        include: ${{ fromJson(needs.smoke-prepare.outputs.includes) }}
     steps:
       -
         name: Prepare
         env:
-          PLATFORM: ${{ matrix.platform }}
+          PLATFORM: ${{ matrix.platforms }}
         run: |
           echo "PLATFORM_PAIR=${PLATFORM//\//-}" >> $GITHUB_ENV
       -
@@ -230,6 +230,6 @@ jobs:
         name: Test
         uses: docker/bake-action@82490499d2e5613fcead7e128237ef0b0ea210f7 # v7.0.0
         with:
-          targets: binary-smoketest
+          targets: ${{ matrix.target }}
           set: |
-            *.platform=${{ matrix.platform }}
+            *.platform=${{ matrix.platforms }}
