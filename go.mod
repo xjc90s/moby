@@ -32,7 +32,6 @@ require (
 	github.com/coreos/go-systemd/v22 v22.7.0
 	github.com/cpuguy83/tar2go v0.3.1
 	github.com/creack/pty v1.1.24
-	github.com/deckarep/golang-set/v2 v2.8.0
 	github.com/distribution/reference v0.6.0
 	github.com/docker/distribution v2.8.3+incompatible
 	github.com/docker/go-connections v0.7.0
