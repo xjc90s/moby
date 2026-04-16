@@ -13,7 +13,7 @@ ARG XX_VERSION=1.9.0
 ARG VPNKIT_VERSION=0.6.0
 
 # DOCKERCLI_VERSION is the version of the CLI to install in the dev-container.
-ARG DOCKERCLI_VERSION=v29.2.1
+ARG DOCKERCLI_VERSION=v29.4.0
 ARG DOCKERCLI_REPOSITORY="https://github.com/docker/cli.git"
 
 # cli version used for integration-cli tests
@@ -21,10 +21,10 @@ ARG DOCKERCLI_INTEGRATION_REPOSITORY="https://github.com/docker/cli.git"
 ARG DOCKERCLI_INTEGRATION_VERSION=v25.0.5
 
 # BUILDX_VERSION is the version of buildx to install in the dev container.
-ARG BUILDX_VERSION=0.32.1
+ARG BUILDX_VERSION=0.33.0
 
 # COMPOSE_VERSION is the version of compose to install in the dev container.
-ARG COMPOSE_VERSION=v5.1.1
+ARG COMPOSE_VERSION=v5.1.3
 
 ARG SYSTEMD="false"
 ARG FIREWALLD="false"
@@ -114,7 +114,7 @@ WORKDIR /usr/src/delve
 # from the https://github.com/go-delve/delve repository.
 # It can be used to run Docker with a possibility of
 # attaching debugger to it.
-ARG DELVE_VERSION=v1.26.0
+ARG DELVE_VERSION=v1.26.1
 ADD https://github.com/go-delve/delve.git?ref=${DELVE_VERSION}&keep-git-dir=1 .
 
 FROM base AS delve-supported
