@@ -124,7 +124,7 @@ require (
 	cloud.google.com/go/longrunning v0.8.0 // indirect
 	code.cloudfoundry.org/clock v1.60.0 // indirect
 	cyphar.com/go-pathrs v0.2.1 // indirect
-	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.20.0 // indirect
+	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.21.0 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/internal v1.11.2 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.5.0 // indirect
 	github.com/ProtonMail/go-crypto v1.3.0 // indirect
