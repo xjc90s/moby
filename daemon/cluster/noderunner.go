@@ -324,16 +324,18 @@ func (n *nodeRunner) Stop() error {
 		n.mu.Unlock()
 		return nil
 	}
+	swarmNode := n.swarmNode
+	done := n.done
 	n.mu.Unlock()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	if err := n.swarmNode.Stop(ctx); err != nil && !strings.Contains(err.Error(), "context canceled") {
+	if err := swarmNode.Stop(ctx); err != nil && !strings.Contains(err.Error(), "context canceled") {
 		return err
 	}
 	n.cluster.SendClusterEvent(lncluster.EventNodeLeave)
-	<-n.done
+	<-done
 	return nil
 }
 
