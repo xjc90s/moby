@@ -310,6 +310,7 @@ func (n *nodeRunner) handleNodeExit(node *swarmnode.Node) {
 // Stop stops the current swarm node if it is running.
 func (n *nodeRunner) Stop() error {
 	n.mu.Lock()
+	n.stopping = true
 	if n.cancelReconnect != nil { // between restarts
 		n.cancelReconnect()
 		n.cancelReconnect = nil
@@ -323,7 +324,6 @@ func (n *nodeRunner) Stop() error {
 		n.mu.Unlock()
 		return nil
 	}
-	n.stopping = true
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 	n.mu.Unlock()
