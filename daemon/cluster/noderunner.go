@@ -36,7 +36,7 @@ type nodeRunner struct {
 
 	repeatedRun     bool
 	cancelReconnect func()
-	stopping        bool
+	stopped         bool
 	cluster         *Cluster // only for accessing config helpers, never call any methods. TODO: change to config struct
 }
 
@@ -310,7 +310,7 @@ func (n *nodeRunner) handleNodeExit(node *swarmnode.Node) {
 // Stop stops the current swarm node if it is running.
 func (n *nodeRunner) Stop() error {
 	n.mu.Lock()
-	n.stopping = true
+	n.stopped = true
 	if n.cancelReconnect != nil { // between restarts
 		n.cancelReconnect()
 		n.cancelReconnect = nil
@@ -363,7 +363,7 @@ func (n *nodeRunner) State() nodeState {
 }
 
 func (n *nodeRunner) enableReconnectWatcher() {
-	if n.stopping {
+	if n.stopped {
 		return
 	}
 	n.reconnectDelay *= 2
@@ -381,7 +381,7 @@ func (n *nodeRunner) enableReconnectWatcher() {
 		}
 		n.mu.Lock()
 		defer n.mu.Unlock()
-		if n.stopping {
+		if n.stopped {
 			return
 		}
 
