@@ -36,6 +36,8 @@ func (ls *layerStore) ChecksumForGraphID(id, parent, newTarDataPath string) (dif
 	if err != nil {
 		return "", 0, err
 	}
+	defer archive.Close()
+
 	dgst, err := digest.FromReader(archive)
 	if doneErr := <-done; err == nil {
 		err = doneErr
