@@ -4,7 +4,7 @@ go 1.25.5
 
 require (
 	cloud.google.com/go/compute/metadata v0.9.0
-	cloud.google.com/go/logging v1.13.2
+	cloud.google.com/go/logging v1.17.0
 	dario.cat/mergo v1.0.2
 	github.com/AdaLogics/go-fuzz-headers v0.0.0-20240806141605-e8a1dd7889d6
 	github.com/Azure/go-ansiterm v0.0.0-20250102033503-faa5f7b0171c
@@ -119,9 +119,9 @@ require (
 
 require (
 	cloud.google.com/go v0.123.0 // indirect
-	cloud.google.com/go/auth v0.18.2 // indirect
+	cloud.google.com/go/auth v0.19.0 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.8 // indirect
-	cloud.google.com/go/longrunning v0.8.0 // indirect
+	cloud.google.com/go/longrunning v0.9.0 // indirect
 	code.cloudfoundry.org/clock v1.60.0 // indirect
 	cyphar.com/go-pathrs v0.2.1 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.21.0 // indirect
@@ -207,7 +207,7 @@ require (
 	github.com/google/s2a-go v0.1.9 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.14 // indirect
-	github.com/googleapis/gax-go/v2 v2.19.0 // indirect
+	github.com/googleapis/gax-go/v2 v2.21.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.28.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
@@ -292,7 +292,7 @@ require (
 	golang.org/x/oauth2 v0.36.0 // indirect
 	golang.org/x/term v0.42.0 // indirect
 	golang.org/x/tools v0.43.0 // indirect
-	google.golang.org/api v0.272.0 // indirect
+	google.golang.org/api v0.274.0 // indirect
 	google.golang.org/genproto v0.0.0-20260401024825-9d38bb4040a9 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260406210006-6f92a3bedf2d // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
