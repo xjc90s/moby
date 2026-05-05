@@ -26,6 +26,9 @@ func checkConntrackProgrammable(nlh nlwrap.Handle) error {
 // DeleteConntrackEntries deletes all the conntrack connections on the host for the specified IP
 // Returns the number of flows deleted for IPv4, IPv6 else error
 func DeleteConntrackEntries(nlh nlwrap.Handle, ipv4List []net.IP, ipv6List []net.IP) error {
+	if len(ipv4List) == 0 && len(ipv6List) == 0 {
+		return nil
+	}
 	if err := checkConntrackProgrammable(nlh); err != nil {
 		return err
 	}
@@ -58,6 +61,9 @@ func DeleteConntrackEntries(nlh nlwrap.Handle, ipv4List []net.IP, ipv6List []net
 }
 
 func DeleteConntrackEntriesByPort(nlh nlwrap.Handle, proto types.Protocol, ports []types.PortBinding) error {
+	if len(ports) == 0 {
+		return nil
+	}
 	if err := checkConntrackProgrammable(nlh); err != nil {
 		return err
 	}
