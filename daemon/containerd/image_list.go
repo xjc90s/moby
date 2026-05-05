@@ -208,6 +208,9 @@ func (i *ImageService) Images(ctx context.Context, opts imagebackend.ListOptions
 				}
 				usage, err := snapshotter.Usage(ctx, d.String())
 				if err != nil {
+					if cerrdefs.IsNotFound(err) {
+						return 0, nil
+					}
 					return 0, err
 				}
 				sizeCache[d] = usage.Size
