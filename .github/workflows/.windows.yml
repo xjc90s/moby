@@ -440,10 +440,23 @@ jobs:
       -
         name: Building contrib/busybox
         run: |
-          & "${{ env.BIN_OUT }}\docker" build -t busybox `
-            --build-arg WINDOWS_BASE_IMAGE `
-            --build-arg WINDOWS_BASE_IMAGE_TAG `
-            .\contrib\busybox\
+          $maxRetries = 5
+          for ($i = 1; $i -le $maxRetries; $i++) {
+            & "${{ env.BIN_OUT }}\docker" build -t busybox `
+              --build-arg WINDOWS_BASE_IMAGE `
+              --build-arg WINDOWS_BASE_IMAGE_TAG `
+              .\contrib\busybox\
+            if ($LASTEXITCODE -eq 0) {
+              break
+            }
+            if ($i -eq $maxRetries) {
+              Write-Error "Failed to build contrib/busybox after $maxRetries attempts"
+              exit 1
+            }
+            $delay = 15 * $i
+            Write-Warning "Build attempt $i failed (exit code: $LASTEXITCODE). Retrying in $delay seconds..."
+            Start-Sleep -Seconds $delay
+          }
         env:
           DOCKER_HOST: npipe:////./pipe/docker_engine
       -
