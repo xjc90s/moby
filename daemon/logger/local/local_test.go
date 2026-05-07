@@ -69,7 +69,7 @@ func TestWriteLog(t *testing.T) {
 
 		var want logdriver.LogEntry
 		var partial logdriver.PartialLogEntryMetadata
-		extraAttrs := []logdriver.LogAttr{
+		extraAttrs := []*logdriver.LogAttr{
 			{Key: "label1", Value: "value1"},
 			{Key: "tag", Value: "custom-tag"},
 		}

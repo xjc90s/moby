@@ -61,7 +61,11 @@ func ValidateLogOpt(cfg map[string]string) error {
 
 type driver struct {
 	logfile *loggerutils.LogFile
-	extra   []logdriver.LogAttr
+
+	// extra contains prebuilt log attributes attached to every log entry.
+	// The slice and its elements must be treated as immutable after initialization,
+	// as they may be shared by multiple marshaled log entries.
+	extra []*logdriver.LogAttr
 }
 
 // New creates a new local logger
@@ -94,11 +98,11 @@ func New(info logger.Info) (logger.Logger, error) {
 		return nil, err
 	}
 
-	attrs := make([]logdriver.LogAttr, 0, len(extraAttrs))
+	attrs := make([]*logdriver.LogAttr, 0, len(extraAttrs))
 	for k, v := range extraAttrs {
-		attrs = append(attrs, logdriver.LogAttr{Key: k, Value: v})
+		attrs = append(attrs, &logdriver.LogAttr{Key: k, Value: v})
 	}
-	slices.SortFunc(attrs, func(a, b logdriver.LogAttr) int {
+	slices.SortFunc(attrs, func(a, b *logdriver.LogAttr) int {
 		if c := cmp.Compare(a.Key, b.Key); c != 0 {
 			return c
 		}
@@ -111,7 +115,7 @@ func New(info logger.Info) (logger.Logger, error) {
 	}, nil
 }
 
-func marshal(m *logger.Message, attrs []logdriver.LogAttr, buffer *[]byte) error {
+func marshal(m *logger.Message, attrs []*logdriver.LogAttr, buffer *[]byte) error {
 	var proto logdriver.LogEntry
 	var md logdriver.PartialLogEntryMetadata
 	messageToProto(m, attrs, &proto, &md)
@@ -166,7 +170,7 @@ func (d *driver) Close() error {
 	return d.logfile.Close()
 }
 
-func messageToProto(msg *logger.Message, extra []logdriver.LogAttr, proto *logdriver.LogEntry, partial *logdriver.PartialLogEntryMetadata) {
+func messageToProto(msg *logger.Message, extra []*logdriver.LogAttr, proto *logdriver.LogEntry, partial *logdriver.PartialLogEntryMetadata) {
 	proto.Source = msg.Source
 	proto.TimeNano = msg.Timestamp.UnixNano()
 	proto.Line = append(proto.Line[:0], msg.Line...)
@@ -179,15 +183,7 @@ func messageToProto(msg *logger.Message, extra []logdriver.LogAttr, proto *logdr
 	} else {
 		proto.PartialLogMetadata = nil
 	}
-	if len(extra) > 0 {
-		proto.Attrs = make([]*logdriver.LogAttr, len(extra))
-		for i, a := range extra {
-			proto.Attrs[i] = &logdriver.LogAttr{
-				Key:   a.Key,
-				Value: a.Value,
-			}
-		}
-	}
+	proto.Attrs = extra
 }
 
 func protoToMessage(proto *logdriver.LogEntry) *logger.Message {

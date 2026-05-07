@@ -19,7 +19,7 @@ import (
 func TestDecodeIncompleteRecord(t *testing.T) {
 	buf := make([]byte, 0)
 
-	extraAttrs := []logdriver.LogAttr{{Key: "a", Value: "b"}}
+	extraAttrs := []*logdriver.LogAttr{{Key: "a", Value: "b"}}
 	err := marshal(&logger.Message{Line: []byte("hello")}, extraAttrs, &buf)
 	assert.NilError(t, err)
 
