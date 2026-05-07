@@ -1211,7 +1211,7 @@ github.com/moby/moby/client/pkg/versions
 ## explicit; go 1.19
 github.com/moby/patternmatcher
 github.com/moby/patternmatcher/ignorefile
-# github.com/moby/policy-helpers v0.0.0-20260324161837-b7c0b994300b
+# github.com/moby/policy-helpers v0.0.0-20260507153417-a39d60132186
 ## explicit; go 1.25.5
 github.com/moby/policy-helpers
 github.com/moby/policy-helpers/image
