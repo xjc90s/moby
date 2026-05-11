@@ -978,7 +978,7 @@ github.com/mitchellh/hashstructure/v2
 # github.com/mitchellh/reflectwalk v1.0.2
 ## explicit
 github.com/mitchellh/reflectwalk
-# github.com/moby/buildkit v0.30.0-rc1
+# github.com/moby/buildkit v0.30.0-rc1.0.20260507164240-1da7e716224c
 ## explicit; go 1.25.5
 github.com/moby/buildkit/api/services/control
 github.com/moby/buildkit/api/types
@@ -1034,6 +1034,7 @@ github.com/moby/buildkit/frontend/dockerfile/instructions
 github.com/moby/buildkit/frontend/dockerfile/linter
 github.com/moby/buildkit/frontend/dockerfile/parser
 github.com/moby/buildkit/frontend/dockerfile/shell
+github.com/moby/buildkit/frontend/dockerfile/version
 github.com/moby/buildkit/frontend/dockerui
 github.com/moby/buildkit/frontend/gateway
 github.com/moby/buildkit/frontend/gateway/client
