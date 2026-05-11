@@ -15,6 +15,7 @@ import (
 	"github.com/moby/moby/client/pkg/jsonmessage"
 	"github.com/moby/moby/v2/internal/testutil/fakecontext"
 	"gotest.tools/v3/assert"
+	is "gotest.tools/v3/assert/cmp"
 )
 
 // Do builds an image from the given context with the supplied options
@@ -53,6 +54,10 @@ func GetImageIDFromBody(t *testing.T, body io.Reader) string {
 		jsonmessage.Display(jm, buf, false, 0)
 		if buf.Len() == 0 {
 			continue
+		}
+
+		if jm.Error != nil {
+			assert.Assert(t, is.Equal(jm.Error, ""))
 		}
 
 		t.Log(buf.String())
