@@ -13,10 +13,17 @@ import (
 // UAStringKey is used as key type for user-agent string in net/context struct
 type UAStringKey struct{}
 
-// DockerUserAgent is the User-Agent the Docker client uses to identify itself.
-// In accordance with RFC 7231 (5.5.3) is of the form:
+// DockerUserAgent is the User-Agent used by the daemon.
 //
-//	[docker client's UA] UpstreamClient([upstream client's UA])
+// It consists of the daemon's User-Agent, optional version metadata, and
+// an optional upstream client comment:
+//
+//	[daemon user agent] [extra] [UpstreamClient(<upstream-user-agent>)]
+//
+// "UpstreamClient" is a Docker-defined convention. The upstream value is
+// sanitized before inclusion. See [RFC9110], section 10.1.5.
+//
+// [RFC9110]: https://www.rfc-editor.org/rfc/rfc9110#section-10.1.5
 func DockerUserAgent(ctx context.Context, extraVersions ...useragent.VersionInfo) string {
 	ua := useragent.AppendVersions(getDaemonUserAgent(), extraVersions...)
 	if upstreamUA := getUpstreamUserAgent(ctx); upstreamUA != "" {
