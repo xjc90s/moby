@@ -10,8 +10,17 @@ import (
 	"github.com/moby/moby/v2/pkg/useragent"
 )
 
-// UAStringKey is used as key type for user-agent string in net/context struct
-type UAStringKey struct{}
+// uaStringKey is used as key type for user-agent string in net/context struct
+type uaStringKey struct{}
+
+// WithUpstreamUserAgent returns a new context carrying the upstream client's
+// User-Agent string.
+func WithUpstreamUserAgent(ctx context.Context, ua string) context.Context {
+	if ua == "" {
+		return ctx
+	}
+	return context.WithValue(ctx, uaStringKey{}, ua)
+}
 
 // DockerUserAgent is the User-Agent used by the daemon.
 //
@@ -71,7 +80,7 @@ func getDaemonUserAgent() string {
 //
 // It returns an empty string if no user-agent is present in the context.
 func getUpstreamUserAgent(ctx context.Context) string {
-	upstreamUA, ok := ctx.Value(UAStringKey{}).(string)
+	upstreamUA, ok := ctx.Value(uaStringKey{}).(string)
 	if !ok || upstreamUA == "" {
 		return ""
 	}

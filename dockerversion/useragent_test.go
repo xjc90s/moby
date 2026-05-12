@@ -32,12 +32,12 @@ func TestDockerUserAgent(t *testing.T) {
 		},
 		{
 			doc:      "daemon user-agent with upstream",
-			ctx:      context.WithValue(t.Context(), UAStringKey{}, "Magic-Client/1.2.3 (linux)"),
+			ctx:      WithUpstreamUserAgent(t.Context(), "Magic-Client/1.2.3 (linux)"),
 			expected: getDaemonUserAgent() + ` UpstreamClient(Magic-Client/1.2.3 \(linux\))`,
 		},
 		{
 			doc: "daemon user-agent with upstream and custom metadata",
-			ctx: context.WithValue(t.Context(), UAStringKey{}, "Magic-Client/1.2.3 (linux)"),
+			ctx: WithUpstreamUserAgent(t.Context(), "Magic-Client/1.2.3 (linux)"),
 			metadata: []useragent.VersionInfo{
 				{Name: "hello", Version: "world"},
 				{Name: "foo", Version: "bar"},
@@ -46,12 +46,12 @@ func TestDockerUserAgent(t *testing.T) {
 		},
 		{
 			doc:      "daemon user-agent with upstream special chars",
-			ctx:      context.WithValue(t.Context(), UAStringKey{}, `Magic-Client/1.2.3 (linux); \ test`),
+			ctx:      WithUpstreamUserAgent(t.Context(), `Magic-Client/1.2.3 (linux); \ test`),
 			expected: getDaemonUserAgent() + ` UpstreamClient(Magic-Client/1.2.3 \(linux\)\; \\ test)`,
 		},
 		{
 			doc:      "daemon user-agent with upstream control chars",
-			ctx:      context.WithValue(t.Context(), UAStringKey{}, "Magic-Client/1.2.3\r\nInjected: evil"),
+			ctx:      WithUpstreamUserAgent(t.Context(), "Magic-Client/1.2.3\r\nInjected: evil"),
 			expected: getDaemonUserAgent() + ` UpstreamClient(Magic-Client/1.2.3Injected: evil)`,
 		},
 	}
