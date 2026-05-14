@@ -88,13 +88,16 @@ func getUpstreamUserAgent(ctx context.Context) string {
 	return "UpstreamClient(" + escapeStr(upstreamUA) + ")"
 }
 
-// escapeStr escapes and sanitizes s for use in a User-Agent comment.
+// escapeStr escapes and sanitizes s for use in a User-Agent comment ([RFC9110]).
+//
+// [RFC9110]: https://www.rfc-editor.org/rfc/rfc9110#section-10.1.5
 func escapeStr(s string) string {
 	var b strings.Builder
 	b.Grow(len(s))
 
 	for i := range len(s) {
 		switch c := s[i]; c {
+		// TODO(thaJeztah): remove redundant escaping semicolons; see https://github.com/moby/moby/pull/52356#discussion_r3234266285
 		case '(', ')', ';', '\\':
 			b.WriteByte('\\')
 			b.WriteByte(c)
