@@ -2,7 +2,6 @@ package dockerversion
 
 import (
 	"context"
-	"fmt"
 	"runtime"
 	"strings"
 	"sync"
@@ -34,7 +33,7 @@ var (
 // getDaemonUserAgent returns the user-agent to use for requests made by
 // the daemon.
 //
-// It includes;
+// It includes:
 //
 // - the docker version
 // - go version
@@ -65,35 +64,32 @@ func getDaemonUserAgent() string {
 //
 // It returns an empty string if no user-agent is present in the context.
 func getUpstreamUserAgent(ctx context.Context) string {
-	var upstreamUA string
-	if ctx != nil {
-		if ki := ctx.Value(UAStringKey{}); ki != nil {
-			upstreamUA = ctx.Value(UAStringKey{}).(string)
-		}
-	}
-	if upstreamUA == "" {
+	upstreamUA, ok := ctx.Value(UAStringKey{}).(string)
+	if !ok || upstreamUA == "" {
 		return ""
 	}
-	return fmt.Sprintf("UpstreamClient(%s)", escapeStr(upstreamUA))
+
+	return "UpstreamClient(" + escapeStr(upstreamUA) + ")"
 }
 
-const charsToEscape = `();\`
-
-// escapeStr returns s with every rune in charsToEscape escaped by a backslash
+// escapeStr escapes and sanitizes s for use in a User-Agent comment.
 func escapeStr(s string) string {
-	var ret strings.Builder
-	for _, currRune := range s {
-		appended := false
-		for _, escapableRune := range charsToEscape {
-			if currRune == escapableRune {
-				ret.WriteString(`\` + string(currRune))
-				appended = true
-				break
+	var b strings.Builder
+	b.Grow(len(s))
+
+	for i := range len(s) {
+		switch c := s[i]; c {
+		case '(', ')', ';', '\\':
+			b.WriteByte('\\')
+			b.WriteByte(c)
+		case '\t':
+			b.WriteByte(c)
+		default:
+			if c >= 0x20 && c != 0x7f {
+				b.WriteByte(c)
 			}
 		}
-		if !appended {
-			ret.WriteRune(currRune)
-		}
 	}
-	return ret.String()
+
+	return b.String()
 }
